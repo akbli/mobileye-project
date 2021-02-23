@@ -11,6 +11,7 @@ from TFL_attantion_phase_1.run_attention import find_tfl_lights
 def load_binary_file(data_dir: str, crop_shape=(81, 81)) -> dict:
     images = np.memmap(data_dir + '\\data.bin', mode='r', dtype=np.uint8).reshape(
         [-1] + list(crop_shape) + [3])
+
     labels = np.memmap(data_dir + '\\labels.bin', mode='r', dtype=np.uint8)
 
     return {'images': images, 'labels': labels}
@@ -55,6 +56,7 @@ def get_rand_pixel(pixels):
 
 def save_image(dir_name: str, image, label):
     data_root_path = "data/data_set"
+
     with open(f"{data_root_path}\\{dir_name}\\data.bin", "ab") as data_file:
         np.array(image, dtype=np.uint8).tofile(data_file)
 
@@ -76,29 +78,24 @@ def pad_image(image: np.ndarray, padding_size: int) -> np.ndarray:
 
 def insert_data_set(x_coord, y_coord, label, image, dir_name):
     size = 81
-    print(len(y_coord), len(x_coord))
-    # padding_image = np.pad(image, pad_width=size // 2, mode='constant', constant_values=0)[:, :, 41:44]
+
     padding_image = pad_image(image, size // 2)
+
     pixels_of_tfl = [p for p in zip(y_coord, x_coord) if label[int(p[0]), int(p[1])] == 19]
     pixels_of_not_tfl = [p for p in zip(y_coord, x_coord) if label[int(p[0]), int(p[1])] != 19]
 
     len_tfl = len(pixels_of_tfl)
     len_not_tfl = len(pixels_of_not_tfl)
     for i in range(min(len_tfl, len_not_tfl)):
-        rand_tfl, index_rand_tfl = get_rand_pixel(pixels_of_tfl)
-        pixels_of_tfl = pixels_of_tfl[:index_rand_tfl] + pixels_of_tfl[index_rand_tfl + 1:]
-
-        cropped_image = crop(padding_image, rand_tfl, size // 2)
-        print(cropped_image.shape)
+        rand_tfl_pixel, rand_tfl_index = get_rand_pixel(pixels_of_tfl)
+        pixels_of_tfl = pixels_of_tfl[:rand_tfl_index] + pixels_of_tfl[rand_tfl_index + 1:]
+        cropped_image = crop(padding_image, rand_tfl_pixel, size // 2)
         save_image(dir_name, cropped_image, 1)
 
-        rand_not_tfl, index_rand_not_tfl = get_rand_pixel(pixels_of_not_tfl)
-        pixels_of_not_tfl = pixels_of_not_tfl[:index_rand_not_tfl] + pixels_of_not_tfl[
-                                                                     index_rand_not_tfl + 1:]
-
-        cropped_image = crop(padding_image, rand_tfl, size // 2)
-        print(cropped_image.shape)
-
+        rand_not_tfl_pixel, rand_not_tfl_index = get_rand_pixel(pixels_of_not_tfl)
+        pixels_of_not_tfl = pixels_of_not_tfl[:rand_not_tfl_index] + pixels_of_not_tfl[
+                                                                     rand_not_tfl_index + 1:]
+        cropped_image = crop(padding_image, rand_not_tfl_pixel, size // 2)
         save_image(dir_name, cropped_image, 0)
 
 
