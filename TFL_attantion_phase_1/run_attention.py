@@ -90,15 +90,14 @@ def get_max_candidates(max_lights_image, image, RGB):
 
     for coordX in range(0, image_height - frame_width, frame_width):
         for coordY in range(0, image_width - frame_width, frame_width):
-            currImage = max_lights_image[coordX:coordX + frame_width, coordY:coordY + frame_width]
-            localMax = np.amax(currImage)
-            maxCurr = np.argmax(currImage)
+            curr_image = max_lights_image[coordX:coordX + frame_width, coordY:coordY + frame_width]
+            max_point = np.argmax(curr_image)
+            max_point_val = np.amax(curr_image)
 
-            if localMax > 100:
-                image[coordX + maxCurr // frame_width, coordY + maxCurr % frame_width] = RGB
-                x_color.append(coordX + maxCurr // frame_width)
-                y_color.append(coordY + maxCurr % frame_width)
-            currImage[:] = localMax
+            if max_point_val > 100:
+                image[coordX + max_point // frame_width, coordY + max_point % frame_width] = RGB
+                x_color.append(coordX + max_point // frame_width)
+                y_color.append(coordY + max_point % frame_width)
 
     return x_color, y_color
 
